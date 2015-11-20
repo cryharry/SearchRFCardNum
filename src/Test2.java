@@ -18,6 +18,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.table.DefaultTableModel;
 
 class MemberMan extends JFrame implements ActionListener{
 	JPanel pNorth,p1,p2,panWest;
@@ -29,8 +30,8 @@ class MemberMan extends JFrame implements ActionListener{
 	String url="jdbc:sqlserver://218.53.104.76:1433;databaseName=unicool";
 	String user="unicool";
 	String pwd="unicool";
-	PreparedStatement pstmtSelect;
-	ResultSet rs;
+	PreparedStatement pstmtSelect, pstmtRow;
+	ResultSet rsCount, rsSearch;
 	String sql="";
 	
 	public MemberMan() {
@@ -69,17 +70,44 @@ class MemberMan extends JFrame implements ActionListener{
 		}
 	}
 	public void search(){
-		try { 
+		try {
+			DefaultTableModel defaultModel =
+					new DefaultTableModel(new String[]{"바코드","학년","반","번호","예전 카드 번호","신규 카드 번호"}, 0) {
+				@Override
+				public boolean isCellEditable(int row,int cloumn) {
+					return false;
+				}
+			};
+			sql = "select count from card_receipt where bra_code='hudt_h'";
+			pstmtRow = con.prepareStatement(sql);
+			int result = 0;
+			if(rsCount.next()) {
+				result = Integer.valueOf(rsCount.getString(1));
+			}
+			
 			sql="select st_id,class,ban,num,s_name,old_rf_num,rf_num from card_receipt where bra_code='hudt_h'";
 			pstmtSelect=con.prepareStatement(sql);
 			//4단계 rs<=실행 저장 
-			rs=pstmtSelect.executeQuery();//데이터
+			rsSearch=pstmtSelect.executeQuery();//데이터
 			//
-			while(rs.next()) {
-				table = new JTable();
+			ResultSetMetaData rsMetaData = rsSearch.getMetaData();
+			
+			Object [] tempObject = new Object[rsMetaData.getColumnCount()];
+			
+			defaultModel.setRowCount(0);
+			
+			while(rsSearch.next()) {
+				for(int i=0; i < rsMetaData.getColumnCount(); i++) {
+					tempObject[i] = rsSearch.getString(i+1);
+				}
+				defaultModel.addRow(tempObject);
+			}
+			table=new JTable(defaultModel);
+			
+			if(defaultModel.getRowCount() > 0) {
+				table.setRowSelectionInterval(0, 0);
 			}
 			//Jtable생성(데이터,열이름) 붙이기
-			table=new JTable();
 			add(new JScrollPane(table),"Center");
 			//화면보이기
 			setVisible(true);
