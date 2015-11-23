@@ -52,6 +52,9 @@ class MemberMan extends JFrame implements ActionListener{
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} finally {
+			if(rsBranch != null) {rsBracn.close();}catch(Exception e){}
+			if(pstmtBranch != null) {pstmtBranch.close();}catch(Exception e){}
 		}
 		pNorth.add(combo);
 		add(pNorth, "North");
@@ -88,6 +91,9 @@ class MemberMan extends JFrame implements ActionListener{
 					}
 				} catch (SQLException e1) {
 					e1.printStackTrace();
+				} finally {
+					if(rsCombo!=null){rsCombo.close();}catch(Exception e){}
+					if(pstmtCombo!=null){pstmtCombo.close();}catch(Exception e){}
 				}
 				
 				combo.getSelectedItem().toString();
