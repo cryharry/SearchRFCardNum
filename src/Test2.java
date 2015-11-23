@@ -15,11 +15,14 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+
+import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 class MemberMan extends JFrame implements ActionListener{
 	JPanel pNorth,p1,p2,panWest;
@@ -39,10 +42,8 @@ class MemberMan extends JFrame implements ActionListener{
 	
 	public MemberMan() {
 		pNorth = new JPanel(new FlowLayout());
-		pNorth.add(new JLabel("이름"));
-		pNorth.add(txtName = new JTextField(6));
 		combo = new JComboBox<>();
-		connectDb();
+		con = connectDb();
 		sql = "select sch_name from branch where s_yno='Y'";
 		try {
 			pstmtBranch = con.prepareStatement(sql);
@@ -50,28 +51,17 @@ class MemberMan extends JFrame implements ActionListener{
 			while(rsBranch.next()) {
 				combo.addItem(rsBranch.getString(1));
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+		} catch(SQLException e2) {
+			
 		} finally {
-			if(rsBranch != null) {rsBracn.close();}catch(Exception e){}
-			if(pstmtBranch != null) {pstmtBranch.close();}catch(Exception e){}
+			if(rsBranch != null) try{rsBranch.close();}catch(Exception e){} 
+			if(pstmtBranch != null) try{pstmtBranch.close();}catch(Exception e){}
 		}
 		pNorth.add(combo);
+		pNorth.add(new JLabel("이름"));
+		pNorth.add(txtName = new JTextField(10));
+		pNorth.add(btnSearch=new JButton("검색"));
 		add(pNorth, "North");
-		
-		//배치 GridLayout(5,1)
-		/*panWest=new JPanel(new GridLayout(2,1));
-		//판넬 p1 이름 txtName
-		p1=new JPanel();
-		p1.add(new JLabel("이름"));
-		p1.add(txtName=new JTextField(10));
-		panWest.add(p1);*/
-		
-		//add(panWest,"West");
-		//판넬 p5 전체보기 추가 삭제
-		p2=new JPanel();
-		p2.add(btnSearch=new JButton("검색"));
-		add(p2,"South");
 		
 		setSize(800, 500);
 		setVisible(true);
@@ -92,24 +82,24 @@ class MemberMan extends JFrame implements ActionListener{
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				} finally {
-					if(rsCombo!=null){rsCombo.close();}catch(Exception e){}
-					if(pstmtCombo!=null){pstmtCombo.close();}catch(Exception e){}
+					if(rsCombo!=null)try{rsCombo.close();}catch(Exception e2){}
+					if(pstmtCombo!=null)try{pstmtCombo.close();}catch(Exception e2){}
 				}
 				
 				combo.getSelectedItem().toString();
 			}
 		});
-		//디비연결메서드
-		connectDb();
 	}
-	public void connectDb(){
+	public Connection connectDb(){
 		try {
 			//1단계
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 			//2단계
 			con=DriverManager.getConnection(url,user,pwd);
 		} catch (Exception e) {
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, e.getMessage());
+		} finally {
+			return con;
 		}
 	}
 	public void search(){
@@ -158,6 +148,12 @@ class MemberMan extends JFrame implements ActionListener{
 			setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			if(rsSearch!=null)try{rsSearch.close();}catch(Exception e){}
+			if(rsCount!=null)try{rsCount.close();}catch(Exception e){}
+			if(pstmtSelect!=null)try{pstmtSelect.close();}catch(Exception e){}
+			if(pstmtRow!=null)try{pstmtRow.close();}catch(Exception e){}
+			sql = "";
 		}
 	}
 	
@@ -165,7 +161,6 @@ class MemberMan extends JFrame implements ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		search();
-		
 	}
 	
 }
