@@ -98,9 +98,8 @@ class MemberMan extends JFrame implements ActionListener{
 			con=DriverManager.getConnection(url,user,pwd);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
-		} finally {
-			return con;
 		}
+		return con;
 	}
 	public void search(){
 		try {
@@ -108,7 +107,7 @@ class MemberMan extends JFrame implements ActionListener{
 					new DefaultTableModel(new String[]{"바코드","학년","반","번호","이름","예전 카드 번호","신규 카드 번호"}, 0) {
 				@Override
 				public boolean isCellEditable(int row,int cloumn) {
-					return true;
+					return false;
 				}
 			};
 			sql = "select count(st_id) from card_receipt where bra_code='"+brName+"'";

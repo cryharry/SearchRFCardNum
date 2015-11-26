@@ -51,7 +51,7 @@ public class RFcard2 {
 	JFrame jFrame = new JFrame("RF카드번호");
 	
 	DefaultTableModel defaultModel =
-			new DefaultTableModel(new String[]{"바코드","학년","반","번호","이름","예전 카드 번호","신규 카드 번호"}, 0) {
+			new DefaultTableModel(new String[]{"바코드","학년","반","번호","이름","신규 카드 번호"}, 0) {
 		@Override
 		public boolean isCellEditable(int row,int cloumn) {
 			return false;
@@ -161,7 +161,7 @@ public class RFcard2 {
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 			con1 = DriverManager.getConnection(url, user, pwd);
 			
-			sql="select st_id,class,ban,num,s_name,old_rf_num,rf_num from card_receipt where bra_code='hudt_h' and s_name like ?";
+			sql="select st_id,class,ban,num,s_name,rf_num from card_receipt where bra_code='shinjung_h' and s_name like ?";
 			pstmt=con1.prepareStatement(sql);
 			pstmt.setString(1, '%'+txtName.getText().trim()+'%');
 			//4단계 rs<=실행 저장 
