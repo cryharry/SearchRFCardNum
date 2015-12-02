@@ -30,6 +30,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.Scanner;
 
 import javax.swing.DefaultCellEditor;
@@ -51,7 +52,7 @@ public class RFcard2 {
 	Connection con;
 	PreparedStatement pstmt;
 	ResultSet rs;
-	String sql="";
+	String sql,st_id="";
 	ArrayList<String> list;
 	JFrame jFrame = new JFrame("RF카드번호");
 	
@@ -138,8 +139,8 @@ public class RFcard2 {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if(e.getClickCount() == 2) {
-					String st_id = String.valueOf(defaultModel.getValueAt(table.getSelectedRow(),0));
-					sql = "SELECT m_date FROM merit WHERE st_id ='"+st_id+"'";
+					st_id = String.valueOf(defaultModel.getValueAt(table.getSelectedRow(),0));
+					sql = "SELECT m_date FROM merit WHERE st_id ='"+st_id+"' and merit_code='69'";
 					try {
 						con = dbConn();
 						pstmt = con.prepareStatement(sql);
@@ -150,9 +151,10 @@ public class RFcard2 {
 						Object [] tempObject = new Object[rsMetaData.getColumnCount()]; 
 						
 						defaultModelChange.setRowCount(0);
+						
 						while(rs.next()) {
 							for(int i=0; i < rsMetaData.getColumnCount(); i++) {
-								tempObject[i] = rs.getString(i+1);
+								tempObject[i] = rs.getDate(i+1);
 							}
 							defaultModelChange.addRow(tempObject);
 						}
@@ -196,23 +198,20 @@ public class RFcard2 {
 						String date = "(";
 						for(int i=0; i<table2.getRowCount(); i++) {
 							if(table2.getValueAt(i, 1) != null && (Boolean)table2.getValueAt(i, 1) == true) {
-								for(int j=0; j<table2.getColumnCount(); j++) {
-									date += "'"+(String)table2.getValueAt(i, 0)+"',";
-								}
+									date += "'"+String.valueOf(table2.getValueAt(i, 0))+"'";
+									if(i != table2.getRowCount()-1) {
+										date += ",";
+									}
 							}
 						}
 						date += ")";
-						pstmt = con.prepareStatement(sql);
-						String sql = "DELETE FROM merit WHERE m_date in ? WHERE merit_code='69'";
-						pstmt.setString(1, date);
-						System.out.println(sql);
-						/*rs = pstmt.executeQuery();
-						while(rs.next()){
-							System.out.println("a");
-						}*/
+						String sql = "DELETE FROM merit WHERE m_date in "+date+" and merit_code='69' and st_id='"+st_id+"'";
+						Statement statement = con.createStatement();
+						statement.executeQuery(sql);
 						JOptionPane.showMessageDialog(jFrame, "변경완료");
 						txtName.requestFocus();
 						dbClose();
+						jFrame2.setVisible(false);
 					} catch (Exception err) {
 						JOptionPane.showMessageDialog(jFrame, err.getMessage());
 					}
